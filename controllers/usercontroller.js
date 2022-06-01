@@ -8,6 +8,7 @@ dotenv.config()
 
 
 class userController{
+    //USER REGISTRATION
     static userRegistration = async(req,res)=>{
         const{name, email, password, password_confirmation, tc} = req.body
         const user = await userModel.findOne({email:email})
@@ -16,6 +17,7 @@ class userController{
         }else{
             if(name && email && password && password_confirmation && tc){
                 if(password === password_confirmation){
+                    //Password encryption using BCRYPT
                     try{
                         const salt = await bcrypt.genSalt(10)
                         const hashPassword = await bcrypt.hash(password,salt)
@@ -43,6 +45,7 @@ class userController{
 
 
     }
+    //USER LOGIN
      static userLogin = async(req,res)=>{
          try{
              const{email, password} = req.body
@@ -73,6 +76,7 @@ class userController{
              res.send({"status":"failed", "message":"unable to login"})
          }
      }
+     //Change user Password
      static changeUserPassword = async(req,res)=>{
          const{password,password_confirmation} = req.body
          if(password && password_confirmation)
@@ -92,9 +96,11 @@ class userController{
             res.send({"status":"failed", "message":"all fields are required"})
          }
      }
+     //Logged User
      static loggedUser = async(req,res)=>{
          res.send({"user":req.user})
      }
+     //Send User password Reset email
      static sendUserPasswordResetEmail = async(req,res)=>{
          const{email} = req.body
          if(email){
@@ -106,14 +112,14 @@ class userController{
                  const link = `http://127.0.0.1:3000/api/user/reset/${user._id}/${token}`
                  console.log(link)
 
-                 /*
-                 //Send Email
+                 
+                 //Send Email using Nodemailer
                  let info = await transporter.sendMail({
                      from:process.env.EMAIL_FROM,
                      to:user.email,
                      subject:"password reset link",
                      html:`<a href=${link}>click here</a>to reset your password`
-                 })*/
+                 })
                  res.send({"status":"success", "message":"Password Reset Email sent...Pleasecheck your email "})
             }else{
                 res.send({"status":"failed", "message":"Email doesn't exists"})
@@ -122,6 +128,7 @@ class userController{
              res.send({"status":"failed", "message":"Email field is required"})
          }
      }
+     //User password Reset
      static userPasswordReset = async(req,res)=>{
          const {password,password_confirmation} = req.body
          const {id,token} = req.params
